@@ -1,5 +1,0 @@
-src/main/java/com/pcsol/jenkins/business/Job.java
-src/main/java/com/pcsol/jenkins/parser/JDOMXMLParser.java
-src/test/java
-src/test/resources
-.classpath
