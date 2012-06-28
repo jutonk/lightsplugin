@@ -1,0 +1,57 @@
+<!-- This plugin controls Jenkins builds with flash lights. -->
+<!-- Copyright (C) 2012 PCSol S.A. -->
+
+<!-- This program is free software: you can redistribute it and/or modify -->
+<!-- it under the terms of the GNU General Public License as published by -->
+<!-- the Free Software Foundation, either version 3 of the License, or -->
+<!-- (at your option) any later version. -->
+
+<!-- This program is distributed in the hope that it will be useful, -->
+<!-- but WITHOUT ANY WARRANTY; without even the implied warranty of -->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the -->
+<!-- GNU General Public License for more details. -->
+
+<!-- You should have received a copy of the GNU General Public License -->
+<!-- along with this program. If not, see <http://www.gnu.org/licenses/>. -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.jenkins-ci.plugins</groupId>
+		<artifactId>plugin</artifactId>
+		<version>1.462</version>
+	</parent>
+
+	<groupId>com.pcsol.jenkins</groupId>
+	<artifactId>lightsjenkinsPlugin</artifactId>
+	<version>1.8-SNAPSHOT</version>
+	<packaging>hpi</packaging>
+	<dependencies>
+		<dependency>
+			<groupId>jdom</groupId>
+			<artifactId>jdom</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>biz.source_code</groupId>
+			<artifactId>base64coder</artifactId>
+			<version>2010-09-21</version>
+		</dependency>
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>repo.jenkins-ci.org</id>
+			<url>http://repo.jenkins-ci.org/public/</url>
+		</repository>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>repo.jenkins-ci.org</id>
+			<url>http://repo.jenkins-ci.org/public/</url>
+		</pluginRepository>
+	</pluginRepositories>
+
+</project>

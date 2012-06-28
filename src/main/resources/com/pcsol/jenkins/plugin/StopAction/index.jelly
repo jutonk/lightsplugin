@@ -1,0 +1,46 @@
+<!-- This plugin controls Jenkins builds with flash lights. -->
+<!-- Copyright (C) 2012	PCSol S.A. -->
+
+<!-- This program is free software: you can redistribute it and/or modify -->
+<!-- it under the terms of the GNU General Public License as published by -->
+<!-- the Free Software Foundation, either version 3 of the License, or -->
+<!-- (at your option) any later version. -->
+
+<!-- This program is distributed in the hope that it will be useful, -->
+<!-- but WITHOUT ANY WARRANTY; without even the implied warranty of -->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the -->
+<!-- GNU General Public License for more details. -->
+
+<!-- You should have received a copy of the GNU General Public License -->
+<!-- along with this program.  If not, see <http://www.gnu.org/licenses/>. -->
+
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+	<l:layout norefresh="true">
+		<l:main-panel>
+			<h3>Fail Projects</h3>
+			<j:if test="${it.getFailProjects().size() != 0}">
+				<j:forEach items="${it.getFailProjects()}" var="project">
+		            <p>${project}</p>
+		        </j:forEach>
+		    </j:if>
+		    <j:if test="${it.getFailProjects().size() == 0}">
+				<p>Red light is off.</p>
+		    </j:if>
+	        <h3>Unstable Projects</h3>
+	        <j:if test="${it.getUnstableProjects().size() != 0}">
+				<j:forEach items="${it.getUnstableProjects()}" var="project">
+		            <p>${project}</p>
+		        </j:forEach>
+		    </j:if>
+		    <j:if test="${it.getUnstableProjects().size() == 0}">
+				<p>Yellow light is off.</p>
+		    </j:if>
+		    <j:if test="${it.showButton()}">
+				<f:form method="post" action="submit">
+			 		<f:submit value="Stop"/>
+				</f:form>
+			</j:if>
+		</l:main-panel>
+	</l:layout>
+</j:jelly>
+				
