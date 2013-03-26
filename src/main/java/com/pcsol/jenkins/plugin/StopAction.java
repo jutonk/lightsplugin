@@ -1,5 +1,5 @@
 /* 
- * This plugin controls Jenkins builds with flash lights.
+x * This plugin controls Jenkins builds with flash lights.
  * Copyright (C) 2012	PCSol S.A.
 
  * This program is free software: you can redistribute it and/or modify
@@ -18,8 +18,6 @@
 
 package com.pcsol.jenkins.plugin;
 
-import org.apache.log4j.Logger;
-
 import hudson.model.Action;
 import hudson.model.AbstractProject;
 import hudson.model.User;
@@ -29,8 +27,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import javax.servlet.ServletException;
+import java.util.logging.Logger;
 
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -39,21 +36,22 @@ import com.pcsol.jenkins.LightsPlugin;
 import com.pcsol.jenkins.business.Gyro;
 import com.pcsol.jenkins.commons.Context;
 
-
 public class StopAction implements Action {
 	/**
 	 * Logger for this class
 	 */
-	private static final Logger logger = Logger.getLogger(StopAction.class);
+	private static final Logger logger = Logger.getLogger(StopAction.class.getCanonicalName());
 
-	public @SuppressWarnings("rawtypes") AbstractProject project;
-	
-	public StopAction(@SuppressWarnings("rawtypes") AbstractProject _project/*, boolean red, boolean yellow*/) {
+	public @SuppressWarnings("rawtypes")
+	AbstractProject project;
+
+	public StopAction(@SuppressWarnings("rawtypes") AbstractProject _project) {
 		project = _project;
 	}
 
 	public String getIconFileName() {
 		return "installer.gif";
+
 	}
 
 	public String getDisplayName() {
@@ -64,97 +62,194 @@ public class StopAction implements Action {
 		return "stop";
 	}
 
-	public void doSubmit(StaplerRequest req, StaplerResponse resp) throws IOException, ServletException {
-		
-		String lastBuildColor = project.getLastBuild().getResult().color.toString();
+	public void doSubmit(StaplerRequest req, StaplerResponse resp)
+			throws Exception {
+
+		String lastBuildColor = project.getLastBuild().getResult().color
+				.toString();
 		User currentUser = User.current();
+		
+//		System.out.println("\n\n********** Stoping lights for project **********");
+		logger.info("\n\n********** Stoping lights for project **********");
+
 		if (lastBuildColor.equalsIgnoreCase("red")) {
-			String projectName = Context.getInstance().getFailedProjects().get(project);
+			String projectName = Context.getInstance().getFailedProjects()
+					.get(project.getDisplayName());
+
 			if (currentUser != null && projectName != null) {
-				Context.getInstance().removeFailedProject(project);
+				Context.getInstance().removeFailedProject(project.getDisplayName());
+
+//				System.out.println("User: " + currentUser.getDisplayName() + " has stopped light for project: " + project.getDisplayName());
+				logger.info("User: " + currentUser.getDisplayName() + " has stopped light for project: " + project.getDisplayName());
+
 				if (Context.getInstance().getFailedProjects().size() == 0) {
-					
+
+//					System.out.println("Failing list is empty, switching red light off...");
 					logger.info("Failing list is empty, switching red light off...");
-					
-					Gyro.doPost(LightsPlugin.getUrl(),LightsPlugin.getRedSocket(),"O");
+
+					Gyro.doPost(LightsPlugin.getUrl(),
+							LightsPlugin.getRedSocket(), "O",
+							LightsPlugin.getUser(), LightsPlugin.getPasswd());
+
 					LightsPlugin.setRedLightOn(false);
 				}
 			}
+
 		} else if (lastBuildColor.equalsIgnoreCase("yellow")) {
-			String projectName = Context.getInstance().getUnstableProjects().get(project);
+			String projectName = Context.getInstance().getUnstableProjects()
+					.get(project.getDisplayName());
+
 			if (currentUser != null && projectName != null) {
-				Context.getInstance().removeUnstableProject(project);
+				Context.getInstance().removeUnstableProject(project.getDisplayName());
+
+//				System.out.println("User: " + currentUser.getDisplayName() + " has stopped light for project: " + project.getDisplayName());
+				logger.info("User: " + currentUser.getDisplayName()
+						+ " has stopped light for project: " + project.getDisplayName());
+
 				if (Context.getInstance().getUnstableProjects().size() == 0) {
-					
+
+//					System.out.println("Unstable projects list is empty, switching yellow light off...");
 					logger.info("Unstable projects list is empty, switching yellow light off...");
-					
-					Gyro.doPost(LightsPlugin.getUrl(),LightsPlugin.getYellowSocket(),"O");
+
+					Gyro.doPost(LightsPlugin.getUrl(),
+							LightsPlugin.getYellowSocket(), "O",
+							LightsPlugin.getUser(), LightsPlugin.getPasswd());
+
 					LightsPlugin.setYellowLightOn(false);
 				}
 			}
 		}
+
+		
+		 resp.sendRedirect(req.getContextPath() + "/job/" +
+		 project.getName());
+
+	}
+
+	public ArrayList<String> getFailProjects() {
+		ArrayList<String> projects = new ArrayList<String>();
+
+		Iterator<Entry<String, String>> it = Context.getInstance()
+				.getFailedProjects().entrySet().iterator();
+
+		while (it.hasNext()) {
+			Map.Entry<String, String> pair = (Map.Entry<String, String>) it
+					.next();
+			projects.add(pair.getKey() + " - "
+					+ pair.getValue());
+		}
+
+		return projects;
+	}
+
+	public ArrayList<String> getUnstableProjects() {
+		ArrayList<String> projects = new ArrayList<String>();
+
+		Iterator<Entry<String, String>> it = Context.getInstance()
+				.getUnstableProjects().entrySet().iterator();
+
+		while (it.hasNext()) {
+			Map.Entry<String, String> pair = (Map.Entry<String, String>) it
+					.next();
+			projects.add(pair.getKey() + " - "
+					+ pair.getValue());
+		}
+
+		return projects;
+	}
+
+
+	public String getProjectAndUser() {
+		if (User.current() != null) {
+			return project.getDisplayName() + " - "
+					+ User.current().getDisplayName();
+		}
+
+		return project.getDisplayName();
+	}
+
+
+	public boolean showStopButton() {
+		if (User.current() != null) {
+
+			if (getFailProjects().size() > 0
+					|| getUnstableProjects().size() > 0) {
+				
+				if(Context.getInstance().getFailedProjects().containsKey(project.getDisplayName())) {
+					return true;
+				}
+				
+				if(Context.getInstance().getUnstableProjects().containsKey(project.getDisplayName())) {
+					return true;
+				}
+				
+				return false;
+			}
+		}
+
+		return false;
+
+	}
+	
+	public boolean showEmptyButton() {
+		if (User.current() != null) {
+
+			if (getFailProjects().size() > 0
+					|| getUnstableProjects().size() > 0) {
+				
+				return true;
+			}
+		}
+
+		return false;
+
+	}
+	
+	public boolean showCheckButton() {
+		if (User.current() != null) {
+			
+			return true;
+		}
+		
+		return false;
+		
+	}
+
+	public void doEmpty(StaplerRequest req, StaplerResponse resp) throws IOException {
+		
+//		System.out.println("\n\n********** Making the lists empty **********");
+		logger.info("\n\n********** Making the lists empty **********");
+		
+		if (Context.getInstance().getFailedProjects().size() > 0) {
+			Gyro.doPost(LightsPlugin.getUrl(), LightsPlugin.getRedSocket(),
+					"0", LightsPlugin.getUser(), LightsPlugin.getPasswd());
+
+			LightsPlugin.setRedLightOn(false);
+		}
+
+		if (Context.getInstance().getUnstableProjects().size() > 0) {
+			Gyro.doPost(LightsPlugin.getUrl(), LightsPlugin.getYellowSocket(),
+					"0", LightsPlugin.getUser(), LightsPlugin.getPasswd());
+
+			LightsPlugin.setYellowLightOn(false);
+		}
+
+		Context.getInstance().getUnstableProjects().clear();
+		Context.getInstance().getFailedProjects().clear();
 		
 		resp.sendRedirect(req.getContextPath() + "/job/" + project.getName());
 	}
 	
-	@SuppressWarnings("rawtypes")
-	public ArrayList<String> getFailProjects() {
-		ArrayList<String> projects = new ArrayList<String>();
+	public void doCheck(StaplerRequest req, StaplerResponse resp) throws IOException {
 		
-		Iterator<Entry<AbstractProject, String>> it = Context.getInstance().getFailedProjects().entrySet().iterator();
+		logger.info("\n\n********** Check projects **********");
+
+		resp.sendRedirect(req.getContextPath() + "/job/" + project.getName());
 		
-		while (it.hasNext()) {
-			Map.Entry<AbstractProject,String> pair = (Map.Entry<AbstractProject,String>) it.next();
-			projects.add(pair.getKey().getDisplayName() + " - " + pair.getValue());
-		}
+		ThreadStart thread = new ThreadStart();
 		
-		return projects;
+		thread.processVerification();
+		
 	}
-	
-	@SuppressWarnings("rawtypes")
-	public ArrayList<String> getUnstableProjects() {
-		ArrayList<String> projects = new ArrayList<String>();
-		
-		Iterator<Entry<AbstractProject, String>> it = Context.getInstance().getUnstableProjects().entrySet().iterator();
-		
-		while (it.hasNext()) {
-			Map.Entry<AbstractProject,String> pair = (Map.Entry<AbstractProject,String>) it.next();
-			projects.add(pair.getKey().getDisplayName() + " - " + pair.getValue());
-		}
-		
-		return projects;
-	}
-	
-	public String getProjectAndUser() {
-		if (User.current() != null) {
-			return project.getDisplayName() + " - " + User.current().getDisplayName();
-		}
-		
-		return project.getDisplayName();
-	}
-	
-	public boolean showButton() {
-		if (User.current() != null) {
-			for (Iterator<String> iterator = getFailProjects().iterator(); iterator.hasNext();) {
-				String str = (String) iterator.next();
-				if (str.contains(getProjectAndUser())) {
-					return true;
-				}
-			}
-			for (Iterator<String> iterator = getUnstableProjects().iterator(); iterator.hasNext();) {
-				String str = (String) iterator.next();
-				if (str.contains(getProjectAndUser())) {
-					return true;
-				}
-			}
-			if (getUnstableProjects().contains(project.getDisplayName() + " - anonymous")) {
-				return true;
-			}
-			if (getFailProjects().contains(project.getDisplayName() + " - anonymous")) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
+
 }

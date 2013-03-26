@@ -16,29 +16,42 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.pcsol.jenkins.plugin;
+package com.pcsol.jenkins.business;
 
-import hudson.Plugin;
-
-public class StopPlugin extends Plugin {
-
-	int compteur = 0;
-	private ThreadStart th;
-
-	public void start() throws Exception {
-
-//		this.th = new ThreadStart();
-//		
-//		Thread myThread = new Thread(this.th);
-//		
-//		myThread.start();
+public class Job {
+	private String name;
+	private String url;
+	private String color;
+	
+	public Job () {
+		name = new String();
+		url = new String();
+		color = new String();
 	}
 	
-	@Override
-	protected void finalize() throws Throwable {
-		
-		// TODO Auto-generated method stub
-		this.th.doStop();
-		super.finalize();
+	public Job(String _name, String _url, String _color) {
+		name = _name;
+		url = _url;
+		color = _color;
 	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setUrl(String url) {
+		this.url = url;
+	}
+	public String getUrl() {
+		return url;
+	}
+	public void setColor(String color) {
+		this.color = color;
+	}
+	public String getColor() {
+		return color;
+	}
+	
 }

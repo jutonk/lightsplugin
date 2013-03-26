@@ -1,6 +1,6 @@
 /* 
  * This plugin controls Jenkins builds with flash lights.
- * Copyright (C) 2012	PCSol S.A.
+ * Copyright (C) 2012    PCSol S.A.
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,69 +18,102 @@
 
 package com.pcsol.jenkins.commons;
 
-import org.apache.log4j.Logger;
-
-import hudson.model.AbstractProject;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class Context {
 	/**
 	 * Logger for this class
 	 */
-	private static final Logger logger = Logger.getLogger(Context.class);
+	private static final Logger logger = Logger.getLogger(Context.class.getCanonicalName());
 
 	private static Context context = null;
-	@SuppressWarnings("rawtypes")
-	private Map<AbstractProject, String> failedProjects;
-	@SuppressWarnings("rawtypes")
-	private Map<AbstractProject, String> unstableProjects;
-	
-	public static Context getInstance(){
-		if(context==null){
+	private Map<String, String> failedProjects;
+	private Map<String, String> unstableProjects;
+	private String jenkinsXML;
+
+	public static Context getInstance() {
+		if (context == null) {
 			context = new Context();
 		}
 		return context;
 	}
-	
-	@SuppressWarnings("rawtypes")
-	public Map<AbstractProject, String> getFailedProjects() {
-		if (failedProjects==null) {
-			failedProjects = new HashMap<AbstractProject, String>();
+
+	public Map<String, String> getFailedProjects() {
+		if (failedProjects == null) {
+			failedProjects = new HashMap<String, String>();
 		}
 		return failedProjects;
 	}
-	
-	@SuppressWarnings("rawtypes")
-	public void addFailedProject(AbstractProject project, String user) {
-		failedProjects.put(project,user);
+
+	public void addFailedProject(String project, String user) {
+		getFailedProjects().put(project, user);
+//		System.out.println("Project added to failing list...");
 		logger.info("Project added to failing list...");
 	}
-	
-	@SuppressWarnings("rawtypes")
-	public void removeFailedProject(AbstractProject project) {
-		failedProjects.remove(project);
+
+	public void removeFailedProject(String project) {
+		getFailedProjects().remove(project);
+//		System.out.println("Project removed from failing list...");
 		logger.info("Project removed from failing list...");
 	}
-	
-	@SuppressWarnings("rawtypes")
-	public Map<AbstractProject, String> getUnstableProjects() {
-		if (unstableProjects==null) {
-			unstableProjects = new HashMap<AbstractProject, String>();
+
+	public Map<String, String> getUnstableProjects() {
+		if (unstableProjects == null) {
+			unstableProjects = new HashMap<String, String>();
 		}
 		return unstableProjects;
 	}
-	
-	@SuppressWarnings("rawtypes")
-	public void addUnstableProject(AbstractProject project, String user) {
-		unstableProjects.put(project,user);
+
+	public void addUnstableProject(String project, String user) {
+		getUnstableProjects().put(project, user);
+//		System.out.println("Project added to unstable projects list...");
 		logger.info("Project added to unstable projects list...");
 	}
-	
-	@SuppressWarnings("rawtypes")
-	public void removeUnstableProject(AbstractProject project) {
-		unstableProjects.remove(project);
+
+	public void removeUnstableProject(String project) {
+		getUnstableProjects().remove(project);
+//		System.out.println("Project removed from unstable projects list...");
 		logger.info("Project removed from unstable projects list...");
 	}
+	
+	public void showFailingList() {
+		Iterator it = getFailedProjects().entrySet().iterator();
+		
+//		System.out.println("\n\n********** Failing project(s) list **********");
+		logger.info("\n\n********** Failing project(s) list **********");
+		
+		while(it.hasNext()) {
+			Map.Entry pairs = (Map.Entry)it.next();
+//			System.out.println((String) pairs.getKey());
+			logger.info((String) pairs.getKey());
+		}
+	}
+	
+	public void showUnstableList() {
+		Iterator it = getUnstableProjects().entrySet().iterator();
+		
+//		System.out.println("\n\n********** Unstable project(s) list **********");
+		logger.info("\n\n********** Unstable project(s) list **********");
+		
+		while(it.hasNext()) {
+			Map.Entry pairs = (Map.Entry)it.next();
+//			System.out.println((String) pairs.getKey());
+			logger.info((String) pairs.getKey());
+		}
+	}
+
+	public String getJenkinsXML() {
+		// TODO Auto-generated method stub
+		return jenkinsXML;
+	}
+
+	public void setJenkinsXML(String jenkinsXML) {
+		// TODO Auto-generated method stub
+		this.jenkinsXML = jenkinsXML;
+	}
+
 }

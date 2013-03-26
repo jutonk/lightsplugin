@@ -25,7 +25,7 @@
 
 	<groupId>com.pcsol.jenkins</groupId>
 	<artifactId>lightsjenkinsPlugin</artifactId>
-	<version>1.8-SNAPSHOT</version>
+	<version>1.9.2</version>
 	<packaging>hpi</packaging>
 	<dependencies>
 		<dependency>
@@ -33,6 +33,7 @@
 			<artifactId>jdom</artifactId>
 			<version>1.1</version>
 		</dependency>
+
 		<dependency>
 			<groupId>biz.source_code</groupId>
 			<artifactId>base64coder</artifactId>
@@ -53,5 +54,18 @@
 			<url>http://repo.jenkins-ci.org/public/</url>
 		</pluginRepository>
 	</pluginRepositories>
-
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<configuration>
+					<formats>
+						<format>html</format>
+						<format>xml</format>
+					</formats>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

@@ -25,5 +25,14 @@
 	<f:entry title="Yellow socket" field="yellowSocket">
 	  <f:textbox default="${descriptor.getYellowSocket()}" />
 	</f:entry>
+	<f:entry title="User name" field="username">
+	  <f:textbox default="${descriptor.getUser()}" />
+	</f:entry>
+	<f:entry title="Password" field="passwd">
+	  <f:password default="${descriptor.getPass()}" />
+	</f:entry>
+	<f:entry title="Jenkins XML Url" field="jenkinsXml">
+	  <f:textbox default="${descriptor.getJenkinsXml()}" />
+	</f:entry>
   </f:section>
 </j:jelly>
