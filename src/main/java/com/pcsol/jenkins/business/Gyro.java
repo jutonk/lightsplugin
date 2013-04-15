@@ -58,6 +58,14 @@ public class Gyro {
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
+			
+			conn.setDoInput(true);
+			conn.setInstanceFollowRedirects(false); 
+			conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+			conn.setRequestProperty("charset", "utf-8");
+			conn.setRequestProperty("Content-Length", "" + Integer.toString(donnees.getBytes().length));
+			conn.setUseCaches (false);
+			
 			String userpassword = user + ":" + passwd;
 			String encodedAuthorization = Base64Coder
 					.encodeString(userpassword);
