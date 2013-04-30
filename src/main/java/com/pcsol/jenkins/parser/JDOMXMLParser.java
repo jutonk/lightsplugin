@@ -84,7 +84,6 @@ public class JDOMXMLParser {
         while (i.hasNext()) {
             Element courant = (Element) i.next();
             tmpJob = new Job(courant.getChildText("name"), courant.getChildText("url"), courant.getChildText("color"));
-            // System.out.println(courant.getChild("nom").getText());
             jobs.add(tmpJob);
         }
 

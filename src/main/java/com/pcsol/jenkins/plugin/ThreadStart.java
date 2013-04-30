@@ -9,12 +9,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.pcsol.jenkins.LightsPlugin;
-import com.pcsol.jenkins.business.Gyro;
 import com.pcsol.jenkins.business.Job;
 import com.pcsol.jenkins.commons.Context;
 import com.pcsol.jenkins.parser.JDOMXMLParser;
-//import org.apache.log4j.Logger;
 
 class ThreadStart implements Runnable {
 	
@@ -66,14 +63,12 @@ class ThreadStart implements Runnable {
 						.get(Calendar.HOUR_OF_DAY) == 17 && cal
 						.get(Calendar.MINUTE) == 0))) {
 
-			// System.out.println("Hi, I'm a thread...");
 
 			JDOMXMLParser K = new JDOMXMLParser();
 			K.urlToFile(Context.getInstance().getJenkinsXML());
 			ArrayList<Job> projet = K.parse();
 			Iterator<Job> i = projet.iterator();
 			
-//			System.out.println("\n\n********** Scanning projects using thread start **********\n\n");
 			logger.info("\n\n********** Scanning projects using thread start **********\n\n");
 
 			while (i.hasNext()) {
@@ -83,24 +78,18 @@ class ThreadStart implements Runnable {
 				String projectName = j.getName();
 				String color = j.getColor();
 
-//				System.out.println("\n\n********** Project handled by thread **********");
 				logger.info("\n\n********** Project handled by thread **********");
 				
-//				System.out.println("Name: " + projectName);
 				logger.info("Name: " + projectName);
 
-//				System.out.println("Color: " + color);
 				logger.info("Color: " + color);
 
-//				System.out.println("********** Project status **********");
 				logger.info("********** Project status **********");
 				
 				if (color.equalsIgnoreCase("red")) {
-					// System.out.println("red");
 					if (!Context.getInstance().getFailedProjects()
 							.containsKey(projectName)) {
 
-//						System.out.println("Project not in failing list");
 						logger.info("Project not in failing list");
 
 						if (Context.getInstance().getFailedProjects().size() == 0) {
@@ -110,7 +99,6 @@ class ThreadStart implements Runnable {
 						Context.getInstance().addFailedProject(projectName,
 								"Not fixed");
 					} else {
-//						System.out.println("Project already in failing list...");
 						logger.info("Project already in failing list...");
 					}
 				}
@@ -119,7 +107,6 @@ class ThreadStart implements Runnable {
 					if (!Context.getInstance().getUnstableProjects()
 							.containsKey(projectName)) {
 
-//						System.out.println("Project not in unstable projects list...");
 						logger.info("Project not in unstable projects list...");
 
 						if (Context.getInstance().getUnstableProjects().size() == 0) {
@@ -129,36 +116,32 @@ class ThreadStart implements Runnable {
 						Context.getInstance().addUnstableProject(projectName,
 								"Not fixed");
 					} else {
-//						System.out.println("Project already in unstable projects list...");
 						logger.info("Project already in unstable projects list...");
 					}
 				}
 
 			}
 			
-//			System.out.println("\n\n********** Scanning projects using thread end **********\n\n");
 			logger.info("\n\n********** Scanning projects using thread end **********\n\n");
 
-//			System.out.println("********** Lights managing by thread **********");
 			logger.info("********** Lights managing by thread **********");
 
 			if (emptyFailingList) {
-				Gyro.doPost(LightsPlugin.getUrl(), LightsPlugin.getRedSocket(),
-						"I", LightsPlugin.getUser(), LightsPlugin.getPasswd());
-				LightsPlugin.setRedLightOn(true);
+				//Gyro.doPost(LightsPlugin.getUrl(), LightsPlugin.getRedSocket(),
+				//		"I", LightsPlugin.getUser(), LightsPlugin.getPasswd());
+				//LightsPlugin.setRedLightOn(true);
 			}
 
 			if (emptyUnstableList) {
-				Gyro.doPost(LightsPlugin.getUrl(),
-						LightsPlugin.getYellowSocket(), "I",
-						LightsPlugin.getUser(), LightsPlugin.getPasswd());
-				LightsPlugin.setYellowLightOn(true);
+				//Gyro.doPost(LightsPlugin.getUrl(),
+				//		LightsPlugin.getYellowSocket(), "I",
+				//		LightsPlugin.getUser(), LightsPlugin.getPasswd());
+				//LightsPlugin.setYellowLightOn(true);
 			}
 
 			emptyFailingList = false;
 			emptyUnstableList = false;
 
-//			System.out.println("********** End Project handling by thread **********\n\n");
 			logger.info("********** End Project handling by thread **********\n\n");
 			
 			// Show lists
@@ -166,7 +149,6 @@ class ThreadStart implements Runnable {
 			Context.getInstance().showUnstableList();
 		}
 		else {
-//        	System.out.println("\n\n********** Not a working day **********\n\n");
         	logger.info("\n\n********** Not a working day **********\n\n");
         }
 	}

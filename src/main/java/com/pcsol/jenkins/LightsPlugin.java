@@ -50,401 +50,407 @@ import com.pcsol.jenkins.commons.Context;
  * 
  * <p>
  * When the user configures the project and enables this builder,
- * {@link DescriptorImpl#newInstance(StaplerRequest)} is invoked and a
- * new {@link LightsPlugin} is created. The created instance is
- * persisted to the project configuration XML by using XStream, so
- * this allows you to use instance fields (like {@link #name}) to
- * remember the configuration.
+ * {@link DescriptorImpl#newInstance(StaplerRequest)} is invoked and a new
+ * {@link LightsPlugin} is created. The created instance is persisted to the
+ * project configuration XML by using XStream, so this allows you to use
+ * instance fields (like {@link #name}) to remember the configuration.
  * 
  * <p>
  * When a build is performed, the
- * {@link #perform(AbstractBuild, Launcher, BuildListener)} method
- * will be invoked.
+ * {@link #perform(AbstractBuild, Launcher, BuildListener)} method will be
+ * invoked.
  * 
  * @author Kohsuke Kawaguchi
  */
 public class LightsPlugin extends Recorder {
-    /**
-     * Logger for this class
-     */
-    private static final Logger logger = Logger.getLogger(LightsPlugin.class.getCanonicalName());
+	/**
+	 * Logger for this class
+	 */
+	private static final Logger logger = Logger.getLogger(LightsPlugin.class
+			.getCanonicalName());
 
-    public static String DISPLAY_NAME = "Lights Plugin";
-    private static boolean redLightOn = false;
-    private static boolean yellowLightOn = false;
-    private static boolean orangeLightOn = false;
-    private static String urlGyro = "";
-    private static String redSocketGyro = "0";
-    private static String yellowSocketGyro = "1";
-    private static String user = "";
-    private static String passwd = "";
-    private static String jenkinsXML = "";
+	public static String DISPLAY_NAME = "Lights Plugin";
+	private static boolean redLightOn = false;
+	private static boolean yellowLightOn = false;
+	private static String urlGyro = "";
+	private static String redSocketGyro = "0";
+	private static String yellowSocketGyro = "1";
+	private static String redSocket = "";
+	private static String yellowSocket = "";
+	private static String user = "";
+	private static String passwd = "";
+	private static String jenkinsXML = "";
 
-    @DataBoundConstructor
-    public LightsPlugin() {
+	@DataBoundConstructor
+	public LightsPlugin() {
 
-    }
+	}
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
-        String socket = null;
-        Calendar cal = new GregorianCalendar();
-        String color = build.getResult().color.toString();
-        UserIdCause userCause = (UserIdCause) build.getCause(UserIdCause.class);
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public boolean perform(AbstractBuild build, Launcher launcher,
+			BuildListener listener) {
+		Calendar cal = new GregorianCalendar();
+		String color = build.getResult().color.toString();
+		UserIdCause userCause = (UserIdCause) build.getCause(UserIdCause.class);
 
-        if ((cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY && cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) && (cal.get(Calendar.HOUR_OF_DAY) >= 9)
-                && (cal.get(Calendar.HOUR_OF_DAY) < 17 || (cal.get(Calendar.HOUR_OF_DAY) == 17 && cal.get(Calendar.MINUTE) == 0))) {
-
-        	//System.out.println("\n\n********** Project handled **********");
-        	logger.info("\n\n********** Project handled **********");
-
-//        	System.out.println("Color: " + color);
-        	logger.info("Color: " + color);
+		redSocket = getDescriptor().getRedSocket();
+		yellowSocket = getDescriptor().getYellowSocket();
 
-//        	System.out.println("Name: " + build.getProject().getDisplayName());
-        	logger.info("Name: " + build.getProject().getDisplayName());
-            if (userCause != null) {
-//            	System.out.println("User: " + userCause.getUserName());
-            	logger.info("User: " + userCause.getUserName());
-            }
+		if ((cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY && cal
+				.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY)
+				&& (cal.get(Calendar.HOUR_OF_DAY) >= 9)
+				&& (cal.get(Calendar.HOUR_OF_DAY) < 17 || (cal
+						.get(Calendar.HOUR_OF_DAY) == 17 && cal
+						.get(Calendar.MINUTE) == 0))) {
 
-//            System.out.println("********** Project status **********");
-            logger.info("********** Project status **********");
-            
-            if (color.equalsIgnoreCase("red")) {
+			logger.info("\n\n********** Project handled **********");
 
-//            	System.out.println("Project fails...");
-            	logger.info("Project fails...");
+			logger.info("Color: " + color);
 
-                if (!Context.getInstance().getFailedProjects().containsKey(build.getProject().getDisplayName())) {
+			logger.info("Name: " + build.getProject().getDisplayName());
+			if (userCause != null) {
+				logger.info("User: " + userCause.getUserName());
+			}
 
-//                	System.out.println("Project not in failing list");
-                	logger.info("Project not in failing list");
+			logger.info("********** Project status **********");
 
-                    if (userCause != null) {
-                        Context.getInstance().addFailedProject(build.getProject().getDisplayName(), userCause.getUserName());
-                    } else {
+			if (color.equalsIgnoreCase("red")) {
 
-//                    	System.out.println("No user detected, user set to 'anonymous/SCM user'");
-                    	logger.info("No user detected, user set to 'anonymous/SCM user'");
+				logger.info("Project has failed...");
 
-                        String lastUser = "anonymous/SCM user";
-                        for (Iterator iterator = build.getCulprits().iterator(); iterator.hasNext();) {
-                            User u = (User) iterator.next();
-                            lastUser = u.getDisplayName();
-                        }
+				if (!Context.getInstance().getFailedProjects()
+						.containsKey(build.getProject().getDisplayName())) {
 
-//                        System.out.println("Adding project to the failing list...");
-                        logger.info("Adding project to the failing list...");
+					logger.info("Project not in failing list");
 
-                        Context.getInstance().addFailedProject(build.getProject().getDisplayName(), lastUser);
-                    }
-                } else {
-//                	System.out.println("Project already in failing list...");
-                	logger.info("Project already in failing list...");
-                }
+					if (userCause != null) {
+						Context.getInstance().addFailedProject(
+								build.getProject().getDisplayName(),
+								userCause.getUserName());
+					} else {
 
-                if (Context.getInstance().getUnstableProjects().containsKey(build.getProject().getDisplayName())) {
+						logger.info("No user detected, user set to 'anonymous/SCM user'");
 
-//                	System.out.println("Project was unstable. Removing project from the list...");
-                	logger.info("Project was unstable. Removing project from the list...");
+						String lastUser = "anonymous/SCM user";
+						for (Iterator iterator = build.getCulprits().iterator(); iterator
+								.hasNext();) {
+							User u = (User) iterator.next();
+							lastUser = u.getDisplayName();
+						}
 
-                    Context.getInstance().removeUnstableProject(build.getProject().getDisplayName());
+						logger.info("Adding project to the failing list...");
 
-                    if (Context.getInstance().getUnstableProjects().size() == 0) {
+						Context.getInstance().addFailedProject(
+								build.getProject().getDisplayName(), lastUser);
+					}
+				} else {
+					logger.info("Project already in failing list...");
+				}
 
-//                    	System.out.println("No more unstable projects, switching the yellow light off");
-                    	logger.info("No more unstable projects, switching the yellow light off");
+				if (Context.getInstance().getUnstableProjects()
+						.containsKey(build.getProject().getDisplayName())) {
 
-                        socket = getDescriptor().getYellowSocket();
-                        Gyro.doPost(urlGyro, socket, "O", user, passwd);
-                    }
-                }
-                
-                socket = getDescriptor().getRedSocket();
+					logger.info("Project was unstable. Removing project from the list...");
 
-            } else if (color.equalsIgnoreCase("yellow")) {
+					Context.getInstance().removeUnstableProject(
+							build.getProject().getDisplayName());
 
-//            	System.out.println("Project is unstable...");
-            	logger.info("Project is unstable...");
+					if (Context.getInstance().getUnstableProjects().size() == 0) {
 
-                if (!Context.getInstance().getUnstableProjects().containsKey(build.getProject().getDisplayName())) {
+						logger.info("No more unstable projects, switching the yellow light off");
 
-//                	System.out.println("Project not in unstable projects list...");
-                	logger.info("Project not in unstable projects list...");
+						setYellowLightOff();
+					}
+				}
 
-                    if (userCause != null) {
-                        Context.getInstance().addUnstableProject(build.getProject().getDisplayName(), userCause.getUserName());
-                    } else {
+				logger.info("Project has failed, switching the red light on");
 
-//                    	System.out.println("No user detected, user set to 'anonymous/SCM user");
-                    	logger.info("No user detected, user set to 'anonymous/SCM user");
+				setRedLightOn();
 
-                        String lastUser = "anonymous/SCM user";
-                        for (Iterator iterator = build.getCulprits().iterator(); iterator.hasNext();) {
-                            User u = (User) iterator.next();
-                            lastUser = u.getDisplayName();
-                        }
+			} else if (color.equalsIgnoreCase("yellow")) {
 
-//                        System.out.println("Adding projects to unstable projects list...");
-                        logger.info("Adding projects to unstable projects list...");
+				logger.info("Project is unstable...");
 
-                        Context.getInstance().addUnstableProject(build.getProject().getDisplayName(), lastUser);
-                    }
-                } else {
-//                	System.out.println("Project already in unstable projects list...");
-                	logger.info("Project already in unstable projects list...");
-                }
+				if (!Context.getInstance().getUnstableProjects()
+						.containsKey(build.getProject().getDisplayName())) {
 
-                if (Context.getInstance().getFailedProjects().containsKey(build.getProject().getDisplayName())) {
+					logger.info("Project not in unstable projects list...");
 
-//                	System.out.println("Project was failing. Removing project from the list...");
-                	logger.info("Project was failing. Removing project from the list...");
+					if (userCause != null) {
+						Context.getInstance().addUnstableProject(
+								build.getProject().getDisplayName(),
+								userCause.getUserName());
+					} else {
 
-                    Context.getInstance().removeFailedProject(build.getProject().getDisplayName());
+						logger.info("No user detected, user set to 'anonymous/SCM user");
 
-                    if (Context.getInstance().getFailedProjects().size() == 0) {
+						String lastUser = "anonymous/SCM user";
+						for (Iterator iterator = build.getCulprits().iterator(); iterator
+								.hasNext();) {
+							User u = (User) iterator.next();
+							lastUser = u.getDisplayName();
+						}
 
-//                    	System.out.println("No more fail projects, switching the red light off");
-                    	logger.info("No more fail projects, switching the red light off");
+						logger.info("Adding projects to unstable projects list...");
 
-                        socket = getDescriptor().getRedSocket();
-                        Gyro.doPost(urlGyro, socket, "O", user, passwd);
-                    }
-                }
-                
-                socket = getDescriptor().getYellowSocket();
+						Context.getInstance().addUnstableProject(
+								build.getProject().getDisplayName(), lastUser);
+					}
+				} else {
+					logger.info("Project already in unstable projects list...");
+				}
 
-            } else {
+				if (Context.getInstance().getFailedProjects()
+						.containsKey(build.getProject().getDisplayName())) {
 
-//            	System.out.println("Project not fail or unstable...");
-            	logger.info("Project not fail or unstable...");
+					logger.info("Project was failing. Removing project from the list...");
 
-                if (Context.getInstance().getUnstableProjects().containsKey(build.getProject().getDisplayName())) {
+					Context.getInstance().removeFailedProject(
+							build.getProject().getDisplayName());
 
-//                	System.out.println("Project was unstable. Removing project from the list...");
-                	logger.info("Project was unstable. Removing project from the list...");
+					if (Context.getInstance().getFailedProjects().size() == 0) {
 
-                    Context.getInstance().removeUnstableProject(build.getProject().getDisplayName());
+						logger.info("No more fail projects, switching the red light off");
 
-                    if (Context.getInstance().getUnstableProjects().size() == 0) {
+						setRedLightOff();
+					}
+				}
 
-//                    	System.out.println("No more unstable projects, switching the yellow light off");
-                    	logger.info("No more unstable projects, switching the yellow light off");
+				logger.info("Project is unstable, switching the yellow light on");
 
-                        socket = getDescriptor().getYellowSocket();
-                        Gyro.doPost(urlGyro, socket, "O", user, passwd);
-                    }
-                }
-                if (Context.getInstance().getFailedProjects().containsKey(build.getProject().getDisplayName())) {
+				setYellowLightOn();
 
-//                	System.out.println("Project was failing. Removing project from the list...");
-                	logger.info("Project was failing. Removing project from the list...");
+			} else {
 
-                    Context.getInstance().removeFailedProject(build.getProject().getDisplayName());
+				logger.info("Project not failed or unstable...");
 
-                    if (Context.getInstance().getFailedProjects().size() == 0) {
+				if (Context.getInstance().getUnstableProjects()
+						.containsKey(build.getProject().getDisplayName())) {
 
-//                    	System.out.println("No more fail projects, switching the red light off");
-                    	logger.info("No more fail projects, switching the red light off");
+					logger.info("Project was unstable. Removing project from the list...");
 
-                        socket = getDescriptor().getRedSocket();
-                        Gyro.doPost(urlGyro, socket, "O", user, passwd);
-                    }
-                }
+					Context.getInstance().removeUnstableProject(
+							build.getProject().getDisplayName());
 
-                socket = null;
-            }
-            
-//            System.out.println("********** Lights status **********");
-            logger.info("********** Lights status **********");
+					if (Context.getInstance().getUnstableProjects().size() == 0) {
 
-            if (socket != null) {
+						logger.info("No more unstable projects, switching the yellow light off");
 
-                if (!(color.equalsIgnoreCase("red") && isRedLightOn()) && !(color.equalsIgnoreCase("yellow") && isYellowLightOn())) {
+						setYellowLightOff();
+					}
+				}
+				if (Context.getInstance().getFailedProjects()
+						.containsKey(build.getProject().getDisplayName())) {
 
-//                	System.out.println("Light is not (or should not be) on...");
-                	logger.info("Light is not (or should not be) on...");
+					logger.info("Project was failing. Removing project from the list...");
 
-                    Gyro.doPost(urlGyro, socket, "I", user, passwd);
+					Context.getInstance().removeFailedProject(
+							build.getProject().getDisplayName());
 
-//                    System.out.println("Light is (or shoud be) on...");
-                    logger.info("Light is (or shoud be) on...");
-                }
-            }
+					if (Context.getInstance().getFailedProjects().size() == 0) {
 
-            if (color.equalsIgnoreCase("red")) {
+						logger.info("No more fail projects, switching the red light off");
 
-//            	System.out.println("Red light is on...");
-            	logger.info("Red light is on...");
+						setRedLightOff();
+					}
+				}
+			}
 
-                setRedLightOn(true);
-            } else if (color.equalsIgnoreCase("yellow")) {
+			logger.info("********** Lights status **********");
 
-//            	System.out.println("Yellow light is on...");
-            	logger.info("Yellow light is on...");
+			if (isRedLightOn()) {
+				logger.info("Red light is (or should be) on...");
+			} else {
+				logger.info("Red light is (or should be) off...");
+			}
 
-                setYellowLightOn(true);
-            }
-            
-//            System.out.println("********** End Project handling **********\n\n");
-            logger.info("********** End Project handling **********\n\n");
-            
-            // Show lists
-            Context.getInstance().showFailingList();
-         	Context.getInstance().showUnstableList();
-        }
-        else {
-//        	System.out.println("********** Not a working day **********");
-        	logger.info("********** Not a working day **********");
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean needsToRunAfterFinalized() {
-        return true;
-    }
-
-    @Override
-    public DescriptorImpl getDescriptor() {
-        return (DescriptorImpl) super.getDescriptor();
-    }
+			if (isYellowLightOn()) {
+				logger.info("Yellow light is (or should be) on...");
+			} else {
+				logger.info("Yellow light is (or should be) off...");
+			}
 
-    @Extension
-    public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
-
+			logger.info("********** End Project handling **********\n\n");
 
-        @Override
-        public String getDisplayName() {
-            return "Enable " + LightsPlugin.DISPLAY_NAME;
-        }
+			// Show lists
+			Context.getInstance().showFailingList();
+			Context.getInstance().showUnstableList();
+		} else {
+			// System.out.println("********** Not a working day **********");
+			logger.info("********** Not a working day **********");
+		}
+		return true;
+	}
 
-        @SuppressWarnings("rawtypes")
-        @Override
-        public boolean isApplicable(Class arg0) {
-            return true;
-        }
-
-        @Override
-        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-            urlGyro = formData.getString("url");
-            redSocketGyro = formData.getString("redSocket");
-            yellowSocketGyro = formData.getString("yellowSocket");
-            user = formData.getString("username");
-            passwd = formData.getString("passwd");
-            jenkinsXML = formData.getString("jenkinsXml");
-            
-            Context.getInstance().setJenkinsXML(jenkinsXML);
-            
-            save();
-            return super.configure(req, formData);
-        }
-
-        public String getUrl() {
-            return urlGyro;
-        }
-
-        public String getRedSocket() {
-            return redSocketGyro;
-        }
-
-        public String getYellowSocket() {
-            return yellowSocketGyro;
-        }
-
-        public String getUser() {
-            return user;
-        }
-
-        public String getPass() {
-            return passwd;
-        }
-        
-        public String getJenkinsXML() {
-        	return jenkinsXML;
-        }
-
-    }
-    
-    
-    
-    
-
-    public BuildStepMonitor getRequiredMonitorService() {
-        return BuildStepMonitor.BUILD;
-    }
-
-    public static void setRedLightOn(boolean redLightOn) {
-        LightsPlugin.redLightOn = redLightOn;
-    }
-
-    public static boolean isRedLightOn() {
-        return redLightOn;
-    }
-
-    public static void setYellowLightOn(boolean yellowLightOn) {
-        LightsPlugin.yellowLightOn = yellowLightOn;
-    }
-
-    public static boolean isYellowLightOn() {
-        return yellowLightOn;
-    }
-    public static void setOrangeLightOn(boolean orangeLightOn) {
-        LightsPlugin.orangeLightOn = orangeLightOn;
-    }
-
-    public static boolean isOrangeLightOn() {
-        return orangeLightOn;
-    }
-
-    public static void setUrl(String url) {
-        LightsPlugin.urlGyro = url;
-    }
-
-    public static String getUrl() {
-        return urlGyro;
-    }
-
-    public static void setRedSocket(String redSocket) {
-        LightsPlugin.redSocketGyro = redSocket;
-    }
-
-    public static String getRedSocket() {
-        return redSocketGyro;
-    }
-
-    public static void setYellowSocket(String yellowSocket) {
-        LightsPlugin.yellowSocketGyro = yellowSocket;
-    }
-
-    public static String getYellowSocket() {
-        return yellowSocketGyro;
-    }
-
-    public static void setUser(String user) {
-        LightsPlugin.user = user;
-    }
-
-    public static String getUser() {
-        return user;
-    }
-
-    public static void setPasswd(String passwd) {
-        LightsPlugin.passwd = passwd;
-    }
-
-    public static String getPasswd() {
-        return passwd;
-    }
-    
-    public static void setJenkinsXML(String jenkinsXML) {
-    	LightsPlugin.jenkinsXML = jenkinsXML;
-    }
-    
-    public static String getJenkinsXML() {
-    	return jenkinsXML;
-    }
+	@Override
+	public boolean needsToRunAfterFinalized() {
+		return true;
+	}
+
+	@Override
+	public DescriptorImpl getDescriptor() {
+		return (DescriptorImpl) super.getDescriptor();
+	}
+
+	@Extension
+	public static final class DescriptorImpl extends
+			BuildStepDescriptor<Publisher> {
+
+		@Override
+		public String getDisplayName() {
+			return "Enable " + LightsPlugin.DISPLAY_NAME;
+		}
+
+		@SuppressWarnings("rawtypes")
+		@Override
+		public boolean isApplicable(Class arg0) {
+			return true;
+		}
+
+		@Override
+		public boolean configure(StaplerRequest req, JSONObject formData)
+				throws FormException {
+			urlGyro = formData.getString("url");
+			redSocketGyro = formData.getString("redSocket");
+			yellowSocketGyro = formData.getString("yellowSocket");
+			user = formData.getString("username");
+			passwd = formData.getString("passwd");
+			jenkinsXML = formData.getString("jenkinsXml");
+
+			Context.getInstance().setJenkinsXML(jenkinsXML);
+
+			save();
+			return super.configure(req, formData);
+		}
+
+		public String getUrl() {
+			return urlGyro;
+		}
+
+		public String getRedSocket() {
+			return redSocketGyro;
+		}
+
+		public String getYellowSocket() {
+			return yellowSocketGyro;
+		}
+
+		public String getUser() {
+			return user;
+		}
+
+		public String getPass() {
+			return passwd;
+		}
+
+		public String getJenkinsXML() {
+			return jenkinsXML;
+		}
+
+	}
+
+	public BuildStepMonitor getRequiredMonitorService() {
+		return BuildStepMonitor.BUILD;
+	}
+
+	public static void setRedLightOn() {
+
+		if (redLightOn == false) {
+
+			LightsPlugin.redLightOn = true;
+			redLightOn = true;
+
+			Gyro.doPost(urlGyro, redSocket, "I", user, passwd);
+		}
+	}
+
+	public static void setRedLightOff() {
+
+		if (redLightOn == true) {
+
+			LightsPlugin.redLightOn = false;
+			redLightOn = false;
+
+			Gyro.doPost(urlGyro, redSocket, "O", user, passwd);
+		}
+	}
+
+	public static boolean isRedLightOn() {
+		return redLightOn;
+	}
+
+	public static void setYellowLightOn() {
+
+		if (yellowLightOn == false) {
+
+			LightsPlugin.yellowLightOn = true;
+			yellowLightOn = true;
+
+			Gyro.doPost(urlGyro, yellowSocket, "I", user, passwd);
+		}
+	}
+
+	public static void setYellowLightOff() {
+
+		if (yellowLightOn == true) {
+
+			LightsPlugin.yellowLightOn = false;
+			yellowLightOn = false;
+
+			Gyro.doPost(urlGyro, yellowSocket, "O", user, passwd);
+		}
+	}
+
+	public static boolean isYellowLightOn() {
+		return yellowLightOn;
+	}
+
+	public static void setUrl(String url) {
+		LightsPlugin.urlGyro = url;
+	}
+
+	public static String getUrl() {
+		return urlGyro;
+	}
+
+	public static void setRedSocket(String redSocket) {
+		LightsPlugin.redSocketGyro = redSocket;
+	}
+
+	public static String getRedSocket() {
+		return redSocketGyro;
+	}
+
+	public static void setYellowSocket(String yellowSocket) {
+		LightsPlugin.yellowSocketGyro = yellowSocket;
+	}
+
+	public static String getYellowSocket() {
+		return yellowSocketGyro;
+	}
+
+	public static void setUser(String user) {
+		LightsPlugin.user = user;
+	}
+
+	public static String getUser() {
+		return user;
+	}
+
+	public static void setPasswd(String passwd) {
+		LightsPlugin.passwd = passwd;
+	}
+
+	public static String getPasswd() {
+		return passwd;
+	}
+
+	public static void setJenkinsXML(String jenkinsXML) {
+		LightsPlugin.jenkinsXML = jenkinsXML;
+	}
+
+	public static String getJenkinsXML() {
+		return jenkinsXML;
+	}
 
 }

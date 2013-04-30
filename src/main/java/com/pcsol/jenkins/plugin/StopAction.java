@@ -33,7 +33,6 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import com.pcsol.jenkins.LightsPlugin;
-import com.pcsol.jenkins.business.Gyro;
 import com.pcsol.jenkins.commons.Context;
 
 public class StopAction implements Action {
@@ -69,7 +68,6 @@ public class StopAction implements Action {
 				.toString();
 		User currentUser = User.current();
 		
-//		System.out.println("\n\n********** Stoping lights for project **********");
 		logger.info("\n\n********** Stoping lights for project **********");
 
 		if (lastBuildColor.equalsIgnoreCase("red")) {
@@ -79,19 +77,13 @@ public class StopAction implements Action {
 			if (currentUser != null && projectName != null) {
 				Context.getInstance().removeFailedProject(project.getDisplayName());
 
-//				System.out.println("User: " + currentUser.getDisplayName() + " has stopped light for project: " + project.getDisplayName());
 				logger.info("User: " + currentUser.getDisplayName() + " has stopped light for project: " + project.getDisplayName());
 
 				if (Context.getInstance().getFailedProjects().size() == 0) {
 
-//					System.out.println("Failing list is empty, switching red light off...");
 					logger.info("Failing list is empty, switching red light off...");
 
-					Gyro.doPost(LightsPlugin.getUrl(),
-							LightsPlugin.getRedSocket(), "O",
-							LightsPlugin.getUser(), LightsPlugin.getPasswd());
-
-					LightsPlugin.setRedLightOn(false);
+					LightsPlugin.setRedLightOff();
 				}
 			}
 
@@ -102,20 +94,14 @@ public class StopAction implements Action {
 			if (currentUser != null && projectName != null) {
 				Context.getInstance().removeUnstableProject(project.getDisplayName());
 
-//				System.out.println("User: " + currentUser.getDisplayName() + " has stopped light for project: " + project.getDisplayName());
 				logger.info("User: " + currentUser.getDisplayName()
 						+ " has stopped light for project: " + project.getDisplayName());
 
 				if (Context.getInstance().getUnstableProjects().size() == 0) {
 
-//					System.out.println("Unstable projects list is empty, switching yellow light off...");
 					logger.info("Unstable projects list is empty, switching yellow light off...");
 
-					Gyro.doPost(LightsPlugin.getUrl(),
-							LightsPlugin.getYellowSocket(), "O",
-							LightsPlugin.getUser(), LightsPlugin.getPasswd());
-
-					LightsPlugin.setYellowLightOn(false);
+					LightsPlugin.setYellowLightOff();
 				}
 			}
 		}
@@ -217,21 +203,16 @@ public class StopAction implements Action {
 
 	public void doEmpty(StaplerRequest req, StaplerResponse resp) throws IOException {
 		
-//		System.out.println("\n\n********** Making the lists empty **********");
 		logger.info("\n\n********** Making the lists empty **********");
 		
 		if (Context.getInstance().getFailedProjects().size() > 0) {
-			Gyro.doPost(LightsPlugin.getUrl(), LightsPlugin.getRedSocket(),
-					"0", LightsPlugin.getUser(), LightsPlugin.getPasswd());
 
-			LightsPlugin.setRedLightOn(false);
+			LightsPlugin.setRedLightOff();
 		}
 
 		if (Context.getInstance().getUnstableProjects().size() > 0) {
-			Gyro.doPost(LightsPlugin.getUrl(), LightsPlugin.getYellowSocket(),
-					"0", LightsPlugin.getUser(), LightsPlugin.getPasswd());
 
-			LightsPlugin.setYellowLightOn(false);
+			LightsPlugin.setYellowLightOff();
 		}
 
 		Context.getInstance().getUnstableProjects().clear();

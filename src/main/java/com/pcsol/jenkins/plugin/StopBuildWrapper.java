@@ -40,7 +40,6 @@ import org.kohsuke.stapler.StaplerRequest;
 import com.pcsol.jenkins.LightsPlugin.DescriptorImpl;
 
 public class StopBuildWrapper extends BuildWrapper {
-//private transient Logger log = LoggerFactory.getLogger(M2ReleaseBuildWrapper.class);
 	
 	/** For backwards compatibility with older configurations. @deprecated */
 	@DataBoundConstructor

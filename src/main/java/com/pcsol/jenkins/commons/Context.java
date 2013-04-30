@@ -51,13 +51,11 @@ public class Context {
 
 	public void addFailedProject(String project, String user) {
 		getFailedProjects().put(project, user);
-//		System.out.println("Project added to failing list...");
 		logger.info("Project added to failing list...");
 	}
 
 	public void removeFailedProject(String project) {
 		getFailedProjects().remove(project);
-//		System.out.println("Project removed from failing list...");
 		logger.info("Project removed from failing list...");
 	}
 
@@ -70,25 +68,21 @@ public class Context {
 
 	public void addUnstableProject(String project, String user) {
 		getUnstableProjects().put(project, user);
-//		System.out.println("Project added to unstable projects list...");
 		logger.info("Project added to unstable projects list...");
 	}
 
 	public void removeUnstableProject(String project) {
 		getUnstableProjects().remove(project);
-//		System.out.println("Project removed from unstable projects list...");
 		logger.info("Project removed from unstable projects list...");
 	}
 	
 	public void showFailingList() {
 		Iterator it = getFailedProjects().entrySet().iterator();
 		
-//		System.out.println("\n\n********** Failing project(s) list **********");
 		logger.info("\n\n********** Failing project(s) list **********");
 		
 		while(it.hasNext()) {
 			Map.Entry pairs = (Map.Entry)it.next();
-//			System.out.println((String) pairs.getKey());
 			logger.info((String) pairs.getKey());
 		}
 	}
@@ -96,12 +90,10 @@ public class Context {
 	public void showUnstableList() {
 		Iterator it = getUnstableProjects().entrySet().iterator();
 		
-//		System.out.println("\n\n********** Unstable project(s) list **********");
 		logger.info("\n\n********** Unstable project(s) list **********");
 		
 		while(it.hasNext()) {
 			Map.Entry pairs = (Map.Entry)it.next();
-//			System.out.println((String) pairs.getKey());
 			logger.info((String) pairs.getKey());
 		}
 	}

@@ -21,5 +21,7 @@ public class JDOMXMLParserTest extends TestCase {
 		
 		assertTrue(jobs.size() > 0);
 		
+		assertEquals(jobs.get(0).getName(),"ADE Integration");
+		assertEquals(jobs.get(0).getUrl(), "http://jenkins.lan.pcsol.be/job/ADE%20Integration/");
 	}
 }

@@ -43,14 +43,12 @@ public class Gyro {
 		OutputStreamWriter writer = null;
 		BufferedReader reader = null;
 		try {
-//			System.out.println("********** POST request **********");
 			logger.info("********** POST request **********");
 			
 			// encodage des paramètres de la requête
 			String donnees = "F" + URLEncoder.encode(socket, "UTF-8") + "="
 					+ URLEncoder.encode(value, "UTF-8");
 
-//			System.out.println("Data: " + donnees);
 			logger.info("Data: " + donnees);
 
 			// création de la connection
@@ -74,7 +72,6 @@ public class Gyro {
 
 			// envoi de la requête
 
-//			System.out.println("POST request: " + conn.toString());
 			logger.info("POST request: " + conn.toString());
 
 			writer = new OutputStreamWriter(conn.getOutputStream());
